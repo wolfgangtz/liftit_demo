@@ -15,7 +15,45 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.urls import path
+from django.urls import re_path
+from rest_framework_swagger.views import get_swagger_view
+from invoices.views import InvoiceList
+from invoices.views import InvoiceDetail
+from invoices.views import FileList
+from invoices.views import FileDetail
+from invoices.views import index
+
+schema_view = get_swagger_view(title='Liftit DEMO API')
+
 
 urlpatterns = [
+    path('', index, name='index'),
     url(r'^admin/', admin.site.urls),
+    url(r'^swagger/', schema_view),
+
+    # Invoice Endpoint's
+    path(
+        'invoice/',
+        InvoiceList.as_view(),
+        name='invoice list'
+    ),
+    re_path(
+        '^invoice/(?P<pk>[0-9a-f-]+)/$',
+        InvoiceDetail.as_view(),
+        name='invoice detail'
+    ),
+
+
+    # File Endpoint's
+    path(
+        'file/',
+        FileList.as_view(),
+        name='file list'
+    ),
+    re_path(
+        '^file/(?P<pk>[0-9a-f-]+)/$',
+        FileDetail.as_view(),
+        name='file detail'
+    ),
 ]
