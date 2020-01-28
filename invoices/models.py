@@ -5,6 +5,24 @@ from django.db import models
 DECIMAL_LENGTH = 20
 DECIMAL_PLACES = 5
 
+class File(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    filename = models.CharField(
+        max_length=100,
+        blank=False,
+        null=False
+    )
+
+    total_items_price = models.DecimalField(
+        max_digits=DECIMAL_LENGTH,
+        decimal_places=DECIMAL_PLACES,
+        blank=False,
+        null=False
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class Invoice(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -69,24 +87,12 @@ class Invoice(models.Model):
     )
 
 
-class File(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    filename = models.CharField(
-        max_length=100,
-        blank=False,
-        null=False
+    file = models.ForeignKey(
+        File,
+        on_delete=models.PROTECT
     )
 
-    callback_url = models.CharField(
-        max_length=200,
-        blank=False,
-        null=False
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-    total_items_price = models.DecimalField(
-        max_digits=DECIMAL_LENGTH,
-        decimal_places=DECIMAL_PLACES,
-        blank=False,
-        null=False
-    )
+

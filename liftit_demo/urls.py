@@ -23,6 +23,7 @@ from invoices.views import InvoiceDetail
 from invoices.views import FileList
 from invoices.views import FileDetail
 from invoices.views import index
+from invoices.views import UploadFileView
 
 schema_view = get_swagger_view(title='Liftit DEMO API')
 
@@ -31,6 +32,13 @@ urlpatterns = [
     path('', index, name='index'),
     url(r'^admin/', admin.site.urls),
     url(r'^swagger/', schema_view),
+
+    path(
+        'upload-file/',
+        UploadFileView.as_view(),
+        name='upload file'
+    ),
+
 
     # Invoice Endpoint's
     path(

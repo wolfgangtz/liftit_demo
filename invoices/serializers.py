@@ -17,7 +17,10 @@ class InvoiceSerializer(serializers.ModelSerializer):
             'item_description',
             'item_amount',
             'item_price',
-            'item_discount_rate'
+            'item_discount_rate',
+            'file',
+            'created_at',
+            'updated_at'
         )
         read_only_fields = (
             'id',
@@ -32,7 +35,8 @@ class FileSerializer(serializers.ModelSerializer):
             'id',
             'filename',
             'total_items_price',
-            'callback_url'
+            'created_at',
+            'updated_at'
         )
         read_only_fields = (
             'id',

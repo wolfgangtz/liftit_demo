@@ -2,19 +2,117 @@
 <html>
 <head>
     <meta charset="utf-8"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <title>Frontend Management</title>
 </head>
 <body>
 
 
-<form action="upload.php" method="post" enctype="multipart/form-data">
-    Select image to upload:
-    <input type="file" name="fileToUpload" id="fileToUpload">
-    <input type="submit" value="Upload Image" name="submit">
-</form>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+        </div>
+        <div class="col-sm" style="margin-top: 150px;" >
+
+        <div id="FormDataPresenter" >
+            <form method="POST" enctype="multipart/form-data" id="FormData1">
+                        Select the CSV file to upload:
+                        <br>
+                        <input type="file" name="file" accept=".csv"  id="file">
+                        <br>
+                        <input type="submit" value="Upload CSV" id="send" name="send" disabled>
+            </form>
+        </div>
+
+        <div id="ResultPresenter" style="display: none" >
+            <div id="processingData" >
+                <h1>Processing Data, please wait .... </h1>
+            </div>
+            <h1 id="showingData" style="display: none" ></h1>
+        </div>
+
+        <div class="col-sm">
+        </div>
+      </div>
+    </div>
+
 
 
     <script>
+
+    $(document).ready(
+        function(){
+
+
+            var sessionName = String(new Date().getTime())
+
+            var webSocket = new WebSocket(
+                'ws://' + window.location.host +
+                '/ws/' + sessionName + '/');
+
+            webSocket.onmessage = function(e) {
+                var data = JSON.parse(e.data);
+                console.log(data)
+                $('#processingData').hide();
+                $('#showingData').show();
+                $('#showingData').text(JSON.stringify(data.content));
+
+            };
+
+            webSocket.onclose = function(e) {
+                console.error('Web socket closed unexpectedly');
+            };
+
+
+            //Enable submit button after upload a CSV file
+            $('#file').change(
+                function(){
+                    if ($(this).val()) {
+                        $('#send').attr('disabled',false);
+                    } 
+                }
+            );
+
+            $( "#send" ).click(function() {
+                event.preventDefault();
+
+                var form = $('#FormData1')[0];
+
+                var data = new FormData(form);
+
+                data.append("session_name", sessionName);
+
+                $('#FormDataPresenter').hide();
+                $('#ResultPresenter').show();
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    url: '/upload-file/',
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    timeout: 600000,
+                    success: function (data) {
+
+                        console.log('SUCCESS : ', data);
+
+                    },
+                    error: function (e) {
+
+                        console.log('ERROR : ', e);
+                        alert('Error processing data.')
+                        $('#ResultPresenter').hide();
+                        $('#FormDataPresenter').show();
+
+                    }
+                });
+
+
+         });
+     });
+
     </script>
 </body>
 </html>
