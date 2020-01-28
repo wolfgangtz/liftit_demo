@@ -1,0 +1,88 @@
+version: '3'
+
+volumes:
+  temporary_data: {}
+  database_data:
+    driver: local
+
+services:
+
+  db:
+    image: postgres:11
+    restart: always
+    volumes:
+      - "database_data:/var/lib/postgresql/data"
+    ports:
+      - '5433:5432'
+
+  redis:
+    image: redis
+    container_name: redis-app
+    expose:
+    - 6379
+
+  application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: liftit-demo
+    container_name: liftit-demo-application
+    command: 'app/entrypoint.sh'
+    links:
+      - db
+    volumes:
+      - ./app:/liftit_demo
+      - temporary_data:/app/tmp
+    environment:
+        DB_NAME: postgres
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+        DB_HOST: db
+        CELERY_BROKER_URL: 'redis://redis-app'
+        CELERY_RESULT_BACKEND: 'redis://redis-app'
+        CHANNEL_REDIS_URL: 'redis-app'
+    ports:
+      - "5000:5000"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: 'app/entrypoint_worker.sh'
+    image: liftit-demo
+    container_name: liftit-demo-worker
+    links:
+      - redis
+      - db
+    volumes:
+      - ./app:/liftit_demo
+      - temporary_data:/app/tmp
+    environment:
+        DB_NAME: postgres
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+        DB_HOST: db
+        CELERY_BROKER_URL: 'redis://redis-app'
+        CELERY_RESULT_BACKEND: 'redis://redis-app'
+        CHANNEL_REDIS_URL: 'redis-app'
+
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: 'app/entrypoint_beat.sh'
+    image: liftit-demo
+    container_name: liftit-demo-beat
+    links:
+      - db
+    volumes:
+      - ./app:/liftit_demo
+      - temporary_data:/app/tmp
+    environment:
+        DB_NAME: postgres
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+        DB_HOST: db
+        CELERY_BROKER_URL: 'redis://redis-app'
+        CELERY_RESULT_BACKEND: 'redis://redis-app'
+        CHANNEL_REDIS_URL: 'redis-app'

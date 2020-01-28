@@ -41,3 +41,21 @@ class FileSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
         )
+
+
+class ListFileSerializer(serializers.ModelSerializer):
+    invoices = InvoiceSerializer(many=True)
+
+    class Meta:
+        model = File
+        fields = (
+            'id',
+            'filename',
+            'total_items_price',
+            'created_at',
+            'updated_at',
+            'invoices'
+        )
+        read_only_fields = (
+            'id',
+        )

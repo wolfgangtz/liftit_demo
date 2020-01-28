@@ -4,6 +4,7 @@ from rest_framework.parsers import FileUploadParser
 from invoices.models import File
 from invoices.serializers import InvoiceSerializer
 from invoices.serializers import FileSerializer
+from invoices.serializers import ListFileSerializer
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.exceptions import ParseError
@@ -11,6 +12,8 @@ from rest_framework import status
 from django.http import JsonResponse
 from liftit_demo.tasks import async_process_csv
 from django.core.files.storage import default_storage
+import os
+from django.conf import settings
 
 def index(request):
     return render(request, 'index.html', {})
@@ -18,24 +21,35 @@ def index(request):
 class InvoiceList(generics.ListCreateAPIView):
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
-    name = 'invoice-list'
 
 class InvoiceDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
-    name = 'invoice-detail'
 
 
 class FileList(generics.ListCreateAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
-    name = 'file-list'
+    detail_serializer_class = ListFileSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            if hasattr(self, 'detail_serializer_class'):
+                return self.detail_serializer_class
+
+        return self.serializer_class
 
 class FileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
-    name = 'file-detail'
+    detail_serializer_class = ListFileSerializer
 
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            if hasattr(self, 'detail_serializer_class'):
+                return self.detail_serializer_class
+
+        return self.serializer_class
 
 class UploadFileView(APIView):
     parser_class = (FileUploadParser,)
@@ -54,8 +68,8 @@ class UploadFileView(APIView):
             raise ParseError("Wrong format")
 
 
-        default_storage.save('tmp/'+upload.name, upload)
-        path = default_storage.path('tmp/'+upload.name)
+        default_storage.save(settings.BASE_DIR + '/tmp/' + upload.name, upload)
+        path = settings.BASE_DIR + '/tmp/' + upload.name
 
         #Queue task using celery.
         async_task = async_process_csv.delay(path, upload.name, request.data['session_name'])

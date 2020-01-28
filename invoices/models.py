@@ -89,7 +89,8 @@ class Invoice(models.Model):
 
     file = models.ForeignKey(
         File,
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
+        related_name='invoices'
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

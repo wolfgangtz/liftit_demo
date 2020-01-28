@@ -9,37 +9,40 @@
 <body>
 
 
-    <div class="container">
-      <div class="row">
-        <div class="col-sm">
-        </div>
+<div class="container">
+    <div class="row">
+
+        <div class="col-sm"></div>
+
         <div class="col-sm" style="margin-top: 150px;" >
 
-        <div id="FormDataPresenter" >
-            <form method="POST" enctype="multipart/form-data" id="FormData1">
-                        Select the CSV file to upload:
-                        <br>
-                        <input type="file" name="file" accept=".csv"  id="file">
-                        <br>
-                        <input type="submit" value="Upload CSV" id="send" name="send" disabled>
-            </form>
-        </div>
-
-        <div id="ResultPresenter" style="display: none" >
-            <div id="processingData" >
-                <h1>Processing Data, please wait .... </h1>
+            <div id="FormDataPresenter" >
+                <form method="POST" enctype="multipart/form-data" id="FormData1">
+                    Select the CSV file to upload:
+                    <br>
+                    <input type="file" name="file" accept=".csv"  id="file">
+                    <br>
+                    <input type="submit" value="Upload CSV" id="send" name="send" disabled>
+                </form>
             </div>
-            <h1 id="showingData" style="display: none" ></h1>
+
+            <div id="ResultPresenter" style="display: none" >
+                <div id="processingData" >
+                    <h1>Processing Data, please wait .... </h1>
+                </div>
+                <h1 id="showingData" style="display: none" ></h1>
+            </div>
+
         </div>
 
-        <div class="col-sm">
-        </div>
-      </div>
+        <div class="col-sm"></div>
+
     </div>
 
+</div>
 
 
-    <script>
+<script>
 
     $(document).ready(
         function(){
@@ -113,6 +116,6 @@
          });
      });
 
-    </script>
+ </script>
 </body>
 </html>

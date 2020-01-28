@@ -9,7 +9,7 @@ def validate_headers(headers):
 
 def process_csv(path, filename):
     errors = []
-
+    total = 0
     result = (True, errors)
 
     file_serializer = FileSerializer(data={'filename': filename, 'total_items_price': 0})
@@ -47,6 +47,7 @@ def process_csv(path, filename):
                         invoice_serializer = InvoiceSerializer(data=invoice_data)
                         if invoice_serializer.is_valid():
                             invoice_serializer.save()
+                            total = total + float(row[7])
                         else:
                             errors.append(
                                 {
@@ -63,6 +64,8 @@ def process_csv(path, filename):
                         result = (False, 'The file ' + filename + ' is corrupt, validate file on line ' + str(line_count) + '. Error capturated: ' + str(e))
                         break
 
+        file.total_items_price = total
+        file.save()
 
         os.remove(path)
         return result
