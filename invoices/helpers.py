@@ -1,8 +1,11 @@
 import csv
 import os
+import json
 from django.conf import settings
+from rest_framework.renderers import JSONRenderer
 from invoices.serializers import InvoiceSerializer
 from invoices.serializers import FileSerializer
+from invoices.serializers import ListFileSerializer
 
 def validate_headers(headers):
     return headers == settings.AVAILABLE_HEADERS
@@ -53,7 +56,7 @@ def process_csv(path, filename):
                                 {
                                 'error_line': line_count,
                                 'error_description': 'The file ' + filename + ' is corrupt, validate file on line ' + str(line_count),
-                                'Error capturated:':invoice_serializer.errors
+                                'error_capturated':invoice_serializer.errors
                                 }
                             )
 
@@ -68,6 +71,12 @@ def process_csv(path, filename):
         file.save()
 
         os.remove(path)
+
+        if result[0]:
+            serialized_result = ListFileSerializer(file)
+            content_result = json.loads(JSONRenderer().render(serialized_result.data))
+            result = (True, errors, content_result)
+
         return result
 
     os.remove(path)

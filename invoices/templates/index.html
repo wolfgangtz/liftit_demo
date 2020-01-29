@@ -5,6 +5,23 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <title>Frontend Management</title>
+    <style>
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+    </style>
 </head>
 <body>
 
@@ -30,7 +47,30 @@
                 <div id="processingData" >
                     <h1>Processing Data, please wait .... </h1>
                 </div>
-                <h1 id="showingData" style="display: none" ></h1>
+                <div id="showingData" style="display: none" >
+                    <h1 id="titleResults" name="titleResults" ></h1>
+                    <table id="presentateResults" name="presentateResults" style="width:100%">
+                        <tbody>
+                            <tr>
+                                <th>Número de factura</th>
+                                <th>Nombres del cliente</th>
+                                <th>Apellidos del cliente</th>
+                                <th>Identificación del cliente</th>
+                                <th>Codigo del item</th>
+                                <th>Descripción del item</th>
+                                <th>Cantidad del item</th>
+                                <th>Precio unitario</th>
+                                <th>Porcentaje de descuento</th>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div id="errorsContainer" name="errorsContainer">
+                        <h2 id="errorResults" name="errorResults" ></h2>
+                        <br>
+                    </div>
+
+                </div>
             </div>
 
         </div>
@@ -55,11 +95,51 @@
                 '/ws/' + sessionName + '/');
 
             webSocket.onmessage = function(e) {
-                var data = JSON.parse(e.data);
-                console.log(data)
                 $('#processingData').hide();
                 $('#showingData').show();
-                $('#showingData').text(JSON.stringify(data.content));
+
+                var data = JSON.parse(e.data);
+                var status = data.content[0];
+                var errors = data.content[1];
+                if(status){
+                    json_response =  data.content[2];
+                    $('#titleResults').text(
+                        'Process finished sucessfully, the invoices in the file ' +
+                        json_response['filename'] +
+                        ' add up to ' +
+                        parseFloat(json_response['total_items_price']).toFixed(2)
+                    );
+
+                    jQuery.each(json_response['invoices'], function(i, val) {
+
+                        $('#presentateResults tr:last').after(
+                            '<tr><th>' + val['invoice_number'] +
+                            '</th><th>' + val['client_name'] +
+                            '</th><th>' + val['client_lastname'] +
+                            '</th><th>' + val['client_id'] +
+                            '</th><th>' + val['item_code'] +
+                            '</th><th>' + val['item_description'] +
+                            '</th><th>' + parseFloat(val['item_amount']).toFixed(2) +
+                            '</th><th>' + parseFloat(val['item_price']).toFixed(2) +
+                            '</th><th>' + parseFloat(val['item_discount_rate']).toFixed(2) +
+                            '</th></tr>'
+                        );
+                    });
+
+                    if (errors.length > 0){
+
+                        $('#errorResults').text('However, we found some errors during the file processing: ');
+
+                        jQuery.each(errors, function(i, val) {
+                            $('#errorsContainer').append(val['error_description'] + ' - ' + JSON.stringify(val['error_capturated']) + '<br>');
+                        });
+                    }
+
+                }else{
+                    $('#presentateResults').hide();
+                    $('#titleResults').text('Process failed, we found this errors: ');
+                    $('#errorResults').text(errors);
+                }
 
             };
 

@@ -23,10 +23,6 @@ class FrontendConsumer(JsonWebsocketConsumer):
         )
         self.close()
 
-    def receive_json(self, content, **kwargs):
-        print("Received event: {}".format(content))
-        self.send_json(content)
-
 
     def send_response(self, event):
         self.send_json(
