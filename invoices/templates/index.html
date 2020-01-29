@@ -99,6 +99,7 @@
                 $('#showingData').show();
 
                 var data = JSON.parse(e.data);
+                console.log(JSON.stringify(data.content))
                 var status = data.content[0];
                 var errors = data.content[1];
                 if(status){

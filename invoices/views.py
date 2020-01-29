@@ -74,7 +74,7 @@ class UploadFileView(APIView):
         #Queue task using celery.
         async_task = async_process_csv.delay(path, upload.name, request.data['session_name'])
 
-        return JsonResponse({'message': 'File in process', 'task_id': async_task.id}, status=status.HTTP_201_CREATED)
+        return JsonResponse({'message': 'File in process', 'task_id': async_task.id}, status=status.HTTP_200_OK)
 
 
 
